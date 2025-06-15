@@ -7,9 +7,9 @@
 (source
  (github username/reponame))
 
-(authors "Author Name <author@example.com>")
+(authors "Julian Kulesh <julian@example.com>")
 
-(maintainers "Maintainer Name <maintainer@example.com>")
+(maintainers "Julian Kulesh <julian@example.com>")
 
 (license LICENSE)
 
@@ -17,8 +17,8 @@
 
 (package
  (name compiler)
- (synopsis "A short synopsis")
- (description "A longer description")
+ (synopsis "Educational C compiler targeting multiple platforms")
+ (description "Educational C compiler targeting multiple platforms")
  (depends ocaml)
  (tags
   ("add topics" "to describe" your project)))
