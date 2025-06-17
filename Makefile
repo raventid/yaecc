@@ -1,4 +1,4 @@
-.PHONY: build clean test install
+.PHONY: build clean test install run
 
 # Default target
 all: build
@@ -18,3 +18,7 @@ test:
 # Install the project
 install:
 	cd compiler && dune install
+
+# Run the compiled binary
+run: build
+	cd compiler && dune exec -- compiler
