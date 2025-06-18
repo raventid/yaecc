@@ -1,0 +1,97 @@
+#+TITLE: YAECC - Yet Another Educational C Compiler
+#+AUTHOR: raventid
+#+DATE: 2025
+
+[[./misc/logo.png]]
+
+* YAECC - Yet Another Educational C Compiler
+
+YAECC is an educational C compiler project designed for learning compiler construction concepts and techniques. This project implements a C compiler from scratch, providing hands-on experience with lexical analysis, parsing, semantic analysis, and code generation.
+
+This project closely follows [[https://norasandler.com/2024/08/20/The-Book-Is-Here.html][Writing a C Compiler by Nora Sandler]], but makes some extensions and changes along the way to explore additional concepts and implementation approaches.
+
+** Features
+
+- [ ] Lexical Analysis
+- [ ] Syntax Analysis (Parser)
+- [ ] Semantic Analysis
+- [ ] Code Generation
+- [ ] Optimization (future)
+
+** Prerequisites
+
+- OCaml
+- Dune build system
+- Make
+
+** Building and Running
+
+The project uses a =Makefile= to simplify common development tasks. All commands should be run from the project root directory.
+
+*** Available Make Targets
+
+- =make= or =make all= - Build the project (default target)
+- =make build= - Build the project using dune
+- =make clean= - Clean build artifacts
+- =make test= - Run tests
+- =make install= - Install the project
+- =make run= - Build and execute the compiler
+
+*** Quick Start
+
+To build and run the compiler:
+
+#+BEGIN_SRC bash
+make run
+#+END_SRC
+
+This command will:
+1. Build the project if needed
+2. Execute the compiled binary
+
+*** Manual Build Steps
+
+If you prefer to use dune directly:
+
+#+BEGIN_SRC bash
+cd compiler
+dune build
+dune exec -- compiler
+#+END_SRC
+
+** Project Structure
+
+#+BEGIN_EXAMPLE
+yaecc/
+├── Makefile              # Build automation
+├── README.org           # This file
+├── compiler/            # Main compiler source code
+│   ├── bin/            # Executable source
+│   ├── lib/            # Library modules
+│   ├── test/           # Unit tests
+│   └── dune-project    # Dune project configuration
+└── misc/
+    └── logo.png        # Project logo
+#+END_EXAMPLE
+
+** Development
+
+*** Running Tests
+
+#+BEGIN_SRC bash
+make test
+#+END_SRC
+
+*** Cleaning Build Artifacts
+
+#+BEGIN_SRC bash
+make clean
+#+END_SRC
+
+** Contributing
+
+This is an educational project. Feel free to explore the code, suggest improvements, or use it as a reference for your own compiler learning journey.
+
+** License
+
+Educational use only.
