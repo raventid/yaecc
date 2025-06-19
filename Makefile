@@ -19,6 +19,10 @@ test:
 install:
 	cd compiler && dune install
 
+# Run x86_64 shell on MacOS
+x86_shell:
+	arch -x86_64 zsh
+
 # Run the compiled binary
 run: build
 	cd compiler && dune exec -- compiler

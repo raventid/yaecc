@@ -1,0 +1,9 @@
+* Tools to use
+
+C23 draft standard https://www.open-std.org/JTC1/SC22/WG14/www/docs/n2310.pdf
+
+ABI for System V https://gitlab.com/x86-psABIs/x86-64-ABI
+Compiler explorer https://godbolt.org
+
+Intel developer manual https://www.intel.com/content/www/us/en/developer/articles/technical/intel-sdm.html
+Unoficial, but easier to browse https://www.felixcloutier.com/x86/
