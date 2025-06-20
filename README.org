@@ -63,15 +63,23 @@ dune exec -- compiler
 
 #+BEGIN_EXAMPLE
 yaecc/
-├── Makefile              # Build automation
-├── README.org           # This file
-├── compiler/            # Main compiler source code
-│   ├── bin/            # Executable source
-│   ├── lib/            # Library modules
-│   ├── test/           # Unit tests
-│   └── dune-project    # Dune project configuration
-└── misc/
-    └── logo.png        # Project logo
+├── .git/                        # Git repository
+├── .gitignore                   # Git ignore rules
+├── .gitmodules                  # Git submodules configuration
+├── Makefile                     # Build automation
+├── README.org                   # This file
+├── compiler/                    # Main compiler source code
+│   ├── README.org              # Compiler-specific documentation
+│   ├── _build/                 # Dune build artifacts
+│   ├── bin/                    # Executable source
+│   ├── lib/                    # Library modules
+│   ├── test/                   # Unit tests
+│   ├── compiler.opam           # OPAM package file
+│   └── dune-project            # Dune project configuration
+├── misc/
+│   └── logo.png                # Project logo
+└── writing-a-c-compiler-tests/  # External test suite (https://github.com/nlsandler/writing-a-c-compiler-tests)
+    └── README.md
 #+END_EXAMPLE
 
 ** Development
