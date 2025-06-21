@@ -82,6 +82,13 @@ yaecc/
     └── README.md
 #+END_EXAMPLE
 
+** Playground
+To test compiler and see it's output you can run this command:
+
+#+BEGIN_SRC bash
+make run f=../sample_programs/return_2.c
+#+END_SRC
+
 ** Development
 
 *** Running Tests

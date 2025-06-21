@@ -1,4 +1,4 @@
-.PHONY: build clean test install run arch-info spec run_assembly
+.PHONY: build clean test install run arch-info spec run_assembly clean-target
 
 # Default target
 all: build
@@ -10,6 +10,11 @@ build:
 # Clean build artifacts
 clean:
 	cd compiler && dune clean
+
+# Clean target directory
+clean-target:
+	rm -rf compiler/target
+	@echo "Target directory cleaned"
 
 # Run tests (TODO: should be external tests package with C samples)
 test:
@@ -32,8 +37,11 @@ x86_shell:
 	arch -x86_64 zsh
 
 # Run the compiled binary
-run: build
-	cd compiler && dune exec -- compiler
+run: build clean-target
+	cd compiler && dune exec -- compiler $(f)
+
+driver:
+	gcc -E -P INPUT_FILE -o PREPROCESSED_FILE
 
 # Show current architecture info
 arch-info:
