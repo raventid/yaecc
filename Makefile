@@ -22,6 +22,11 @@ spec:
 install:
 	cd compiler && dune install
 
+raw_assembly:
+	@mkdir -p sample_programs/_build/$$(uname -m)
+	gcc -S -O -fno-asynchronous-unwind-tables -fcf-protection=none sample_programs/$(f) -o sample_programs/_build/$$(uname -m)/$$(basename $(f) .c).s
+	@echo "Assembly generated: sample_programs/_build/$$(uname -m)/$$(basename $(f) .c).s"
+
 # Run x86_64 shell on MacOS
 x86_shell:
 	arch -x86_64 zsh
