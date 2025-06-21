@@ -1,0 +1,74 @@
+*** Elevate your Mac OS Ocaml tooling skills build and cross-compile for x86_64
+
+We are using opinionated set of tools, but will show many useful commands that are applicable on
+any Mac OS system (and probably any other unix system).
+
+
+We will use HOMEBREW package manager and this command will allow us to install it 
+#+BEGIN_SRC bash
+arch -x86_64 /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install.sh)"
+#+END_SRC
+
+This HOMEBREW is isolated from the aarch64 homebrew, so we need to install packages we want to use:
+
+
+#+BEGIN_SRC bash
+arch -x86_64 zsh  # switch to x86_64 zsh shell
+
+eval "$(/usr/local/bin/brew shellenv)" # set up HOMEBREW environment variables to use x86 homebrew
+
+arch -x86_64 brew install opam
+opam init --root /Users/username/.opam_x86/ # configuration for x86_64 opam
+
+eval $(opam env) # we should run this from x86 shell
+
+
+arch -x86_64 brew install llvm
+arch -x86_64 brew install git
+#+END_SRC
+
+
+#+BEGIN_SRC bash
+arch -x86_64 zsh
+eval "$(/usr/local/bin/brew shellenv)"
+OPAMROOT=/Users/username/.opam_x86/
+#+END_SRC
+
+** Modify .zhrc to enjoy seemless experience
+#+BEGIN_SRC zsh
+if [ "${arch_name}" = "x86_64" ]; then
+        export PROMPT='%F{blue}'[${arch_name}]$PROMPT
+        # Use specialized homebrew installed for x86
+        eval "$(/usr/local/bin/brew shellenv)"
+        # BEGIN opam configuration
+        # This is useful if you're using opam as it adds:
+        #   - the correct directories to the PATH
+        #   - auto-completion for the opam binary
+        # This section can be safely removed at any time if needed.
+        [[ ! -r '/Users/username/.opam_x86/opam-init/init.zsh' ]] || source '/Users/username/.opam_x86/opam-init/init.zsh' > /dev/null 2> /dev/null
+        # Force set path to .opam_x86
+        export OPAMROOT="~/.opam_x86"
+        # END opam configuration
+elif [ "${arch_name}" = "arm64" ]; then
+    eval "$(/opt/homebrew/bin/brew shellenv)"
+    # echo "Running on ARM - ${arch_name}"
+    [[ ! -r '/Users/username/.opam/opam-init/init.zsh' ]] || source '/Users/username/.opam/opam-init/init.zsh' > /dev/null 2> /dev/null
+fi
+#END_SRC
+
+It is nice to have an alias to launch your x86 shell. 
+
+#+BEGIN_SRC zsh
+alias x86="arch -x86_64 zsh"
+#+END_SRC
+
+** Nice to now
+You can configure some opam settings by calling opam var (check documentation for this command)
+
+
+** From scratch guide
+
+This guide assumes no llvm or ocaml is installed on your system. After running those commands you will have a working x86_64 ocaml compiler and llvm installed on your system.
+You can use this to build and run your ocaml projects on x86_64 architecture. Also you will get a fully working ocaml/llvm environment for arm architecture.
+
+I intentially do not introduce special scripts, so you can review the code below and see if it fits you.
