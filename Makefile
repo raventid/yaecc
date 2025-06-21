@@ -1,4 +1,4 @@
-.PHONY: build clean test install run
+.PHONY: build clean test install run arch-info
 
 # Default target
 all: build
@@ -26,3 +26,17 @@ x86_shell:
 # Run the compiled binary
 run: build
 	cd compiler && dune exec -- compiler
+
+# Show current architecture info
+arch-info:
+	@echo "════════════════════════════════════════════════════════════════"
+	@echo "Current Architecture Information"
+	@echo "════════════════════════════════════════════════════════════════"
+	@echo "System architecture: $$(uname -m)"
+	@echo "OCaml compiler: $$(file $$(which ocamlopt) | cut -d: -f2-)"
+	@echo "Dune build tool: $$(file $$(which dune) | cut -d: -f2-)"
+	@echo ""
+	@echo "Current build state:"
+	@cd compiler && dune build >/dev/null 2>&1 && \
+		(echo "Compiled executable: $$(file _build/default/bin/main.exe | cut -d: -f2-)")
+	@echo "════════════════════════════════════════════════════════════════"
