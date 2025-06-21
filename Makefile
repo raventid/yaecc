@@ -1,4 +1,4 @@
-.PHONY: build clean test install run arch-info
+.PHONY: build clean test install run arch-info spec
 
 # Default target
 all: build
@@ -14,6 +14,9 @@ clean:
 # Run tests (TODO: should be external tests package with C samples)
 test:
 	cd compiler && dune runtest
+
+spec:
+	cd writing-a-c-compiler-tests && ./test_compiler --check-setup
 
 # Install the project
 install:
