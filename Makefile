@@ -1,4 +1,4 @@
-.PHONY: build clean test install run arch-info spec
+.PHONY: build clean test install run arch-info spec run_assembly
 
 # Default target
 all: build
