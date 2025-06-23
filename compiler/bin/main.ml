@@ -1,9 +1,19 @@
 open Printf
 
-let create_target_dir () =
-  let target_dir = "_target" in
+let create_target_dir input_file =
+  let base_target_dir = "_target" in
+  let filename = Filename.basename input_file in
+  let filename_without_ext = Filename.remove_extension filename in
+  let target_dir = Filename.concat base_target_dir filename_without_ext in
+  
+  (* Create base _target directory if it doesn't exist *)
+  if not (Sys.file_exists base_target_dir) then
+    Sys.mkdir base_target_dir 0o755;
+  
+  (* Create subdirectory for this specific file *)
   if not (Sys.file_exists target_dir) then
     Sys.mkdir target_dir 0o755;
+  
   target_dir
 
 let run_command cmd =
@@ -12,6 +22,10 @@ let run_command cmd =
   if exit_code <> 0 then
     failwith (sprintf "Command failed with exit code %d: %s" exit_code cmd)
 
+(* The -E option tells GCC to run only the preprocessor, *)
+(* not the later steps of the compilation process     *)
+(* The -P option tells the preprocessor *)
+(* not to emit linemarkers; our lexer and parser won’t be able to process them *)
 let preprocess_file input_file target_dir =
   let preprocessed_file = Filename.concat target_dir "preprocessed.i" in
   let cmd = sprintf "gcc -E -P %s -o %s" input_file preprocessed_file in
@@ -37,11 +51,17 @@ let main () =
     exit 1
   end;
   
-  let input_file = Sys.argv.(1) in
+  let input_file_arg = Sys.argv.(1) in
+  (* Convert relative path to absolute path from compiler directory *)
+  let input_file = if Filename.is_relative input_file_arg then
+    Filename.concat ".." input_file_arg
+  else
+    input_file_arg
+  in
   printf "Compiling: %s\n" input_file;
   
   (* Create target directory *)
-  let target_dir = create_target_dir () in
+  let target_dir = create_target_dir input_file_arg in
   printf "Created target directory: %s\n" target_dir;
   
   (* Step 1: Preprocess *)

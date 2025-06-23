@@ -13,7 +13,7 @@ clean:
 
 # Clean target directory
 clean-target:
-	rm -rf compiler/target
+	rm -rf compiler/_target
 	@echo "Target directory cleaned"
 
 # Run tests (TODO: should be external tests package with C samples)
@@ -39,9 +39,6 @@ x86_shell:
 # Run the compiled binary
 run: build clean-target
 	cd compiler && dune exec -- compiler $(f)
-
-driver:
-	gcc -E -P INPUT_FILE -o PREPROCESSED_FILE
 
 # Show current architecture info
 arch-info:
