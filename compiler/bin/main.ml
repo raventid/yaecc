@@ -1,3 +1,9 @@
+(* 
+  --lex Directs it to run the lexer, but stop before parsing
+  --parse Directs it to run the lexer and parser, but stop before assembly generation
+  --codegen Directs it to perform lexing, parsing, and assembly generation, but stop before code emission 
+*)
+
 open Printf
 
 let create_target_dir input_file =
