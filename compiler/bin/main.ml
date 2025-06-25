@@ -6,6 +6,12 @@
 
 open Printf
 
+type compilation_stage = 
+  | Lex
+  | Parse
+  | Codegen
+  | Full
+
 let create_target_dir input_file =
   let base_target_dir = "_target" in
   let filename = Filename.basename input_file in
@@ -51,13 +57,29 @@ let compile_to_executable assembly_file target_dir =
   run_command cmd;
   executable_file
 
-let main () =
-  if Array.length Sys.argv < 2 then begin
-    printf "Usage: %s <input_file.c>\n" Sys.argv.(0);
+let parse_args () =
+  let stage = ref Full in
+  let input_file = ref "" in
+  let args = Array.sub Sys.argv 1 (Array.length Sys.argv - 1) in
+  
+  Array.iter (fun arg ->
+    match arg with
+    | "--lex" -> stage := Lex
+    | "--parse" -> stage := Parse
+    | "--codegen" -> stage := Codegen
+    | _ when !input_file = "" -> input_file := arg
+    | _ -> failwith (sprintf "Unknown argument: %s" arg)
+  ) args;
+  
+  if !input_file = "" then begin
+    printf "Usage: %s [--lex|--parse|--codegen] <input_file.c>\n" Sys.argv.(0);
     exit 1
   end;
   
-  let input_file_arg = Sys.argv.(1) in
+  (!stage, !input_file)
+
+let main () =
+  let (stage, input_file_arg) = parse_args () in
   (* Convert relative path to absolute path from compiler directory *)
   let input_file = if Filename.is_relative input_file_arg then
     Filename.concat ".." input_file_arg
@@ -75,12 +97,33 @@ let main () =
   let preprocessed_file = preprocess_file input_file target_dir in
   printf "Preprocessed file: %s\n" preprocessed_file;
   
+  (* For --lex, we would stop here and run lexer (not implemented yet) *)
+  if stage = Lex then begin
+    printf "\n=== Lexing Complete ===\n";
+    printf "Lexer output would be processed here\n";
+    exit 0
+  end;
+  
+  (* For --parse, we would stop here and run parser (not implemented yet) *)
+  if stage = Parse then begin
+    printf "\n=== Parsing Complete ===\n";
+    printf "Parser output would be processed here\n";
+    exit 0
+  end;
+  
   (* Step 2: Compile to assembly *)
   printf "\n=== Step 2: Compile to Assembly ===\n";
   let assembly_file = compile_to_assembly preprocessed_file target_dir in
   printf "Assembly file: %s\n" assembly_file;
   
-  (* Step 3: Compile to executable *)
+  (* For --codegen, we stop here *)
+  if stage = Codegen then begin
+    printf "\n=== Code Generation Complete ===\n";
+    printf "Assembly generation complete, stopping before linking\n";
+    exit 0
+  end;
+  
+  (* Step 3: Compile to executable (only for Full compilation) *)
   printf "\n=== Step 3: Link to Executable ===\n";
   let executable_file = compile_to_executable assembly_file target_dir in
   printf "Executable file: %s\n" executable_file;
