@@ -5,6 +5,7 @@
 *)
 
 open Printf
+open Compiler.Lexer
 
 type compilation_stage = 
   | Lex
@@ -98,11 +99,19 @@ let main () =
   printf "Preprocessed file: %s\n" preprocessed_file;
   
   (* For --lex, we would stop here and run lexer (not implemented yet) *)
-  if stage = Lex then begin
+  (* if stage = Lex then begin *)
     printf "\n=== Lexing Complete ===\n";
-    printf "Lexer output would be processed here\n";
-    exit 0
-  end;
+    let content = 
+      let ic = open_in preprocessed_file in
+      let content = really_input_string ic (in_channel_length ic) in
+      close_in ic;
+      content
+    in
+    let tokens = lex content in
+    printf "Tokens:\n";
+    print_tokens tokens;
+    (* exit 0 *)
+  (* end; *)
   
   (* For --parse, we would stop here and run parser (not implemented yet) *)
   if stage = Parse then begin
