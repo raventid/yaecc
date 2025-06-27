@@ -1,15 +1,15 @@
-.PHONY: build clean test install run arch-info spec run_assembly clean-target
+.PHONY: build clean test install run arch-info spec check-setup run_assembly clean-target
 
 # Default target
 all: build
 
 # Build the project using dune
 build:
-	cd compiler && dune build
+	cd compiler && opam exec -- dune build
 
 # Clean build artifacts
 clean:
-	cd compiler && dune clean
+	cd compiler && opam exec -- dune clean
 
 # Clean target directory
 clean-target:
@@ -18,14 +18,15 @@ clean-target:
 
 # Run tests (TODO: should be external tests package with C samples)
 test:
-	cd compiler && dune runtest
+	cd compiler && opam exec -- dune runtest
 
-spec:
+# Check setup with external test framework
+check-setup:
 	cd writing-a-c-compiler-tests && ./test_compiler --check-setup
 
 # Install the project
 install:
-	cd compiler && dune install
+	cd compiler && opam exec -- dune install
 
 raw_assembly:
 	@mkdir -p sample_programs/_build/$$(uname -m)
@@ -38,7 +39,11 @@ x86_shell:
 
 # Run the compiled binary
 run: build clean-target
-	cd compiler && dune exec -- compiler $(f)
+	cd compiler && opam exec -- dune exec -- compiler $(f)
+
+# Run spec tests
+spec: build
+	./writing-a-c-compiler-tests/test_compiler $$(pwd)/compiler/_build/default/bin/main.exe --chapter 1 --stage lex
 
 # Show current architecture info
 arch-info:
