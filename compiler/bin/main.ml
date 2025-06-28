@@ -99,7 +99,7 @@ let main () =
   printf "Preprocessed file: %s\n" preprocessed_file;
   
   (* For --lex, we would stop here and run lexer (not implemented yet) *)
-  (* if stage = Lex then begin *)
+  if stage = Lex then begin
     printf "\n=== Lexing Complete ===\n";
     let content = 
       let ic = open_in preprocessed_file in
@@ -110,8 +110,8 @@ let main () =
     let tokens = lex content in
     printf "Tokens:\n";
     print_tokens tokens;
-    (* exit 0 *)
-  (* end; *)
+    exit 0
+  end;
   
   (* For --parse, we would stop here and run parser (not implemented yet) *)
   if stage = Parse then begin
