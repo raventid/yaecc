@@ -84,8 +84,12 @@ let rec tokenize input pos acc =
     | ';' -> tokenize input (pos + 1) (Semicolon :: acc)
     | c when is_digit c ->
         let (const_str, new_pos) = read_constant input pos in
-        let const_val = int_of_string const_str in
-        tokenize input new_pos (Constant const_val :: acc)
+        (* Check if there are alphabetic characters immediately following the constant *)
+        if new_pos < String.length input && is_alpha input.[new_pos] then
+          failwith (sprintf "Invalid token: numeric constant followed by alphabetic character at position %d" pos)
+        else
+          let const_val = int_of_string const_str in
+          tokenize input new_pos (Constant const_val :: acc)
     | c when is_alpha c ->
         let (ident_str, new_pos) = read_identifier input pos in
         let token = keyword_or_identifier ident_str in
