@@ -110,6 +110,10 @@ let main () =
     let tokens = lex content in
     printf "Tokens:\n";
     print_tokens tokens;
+  end;
+  
+  if stage == Lex then begin 
+    printf "Lexer flag --lex is set, stopping after lexing\n";
     exit 0
   end;
   
