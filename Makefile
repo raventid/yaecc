@@ -41,6 +41,9 @@ x86_shell:
 run: build clean-target
 	cd compiler && opam exec -- dune exec -- compiler $(f)
 
+lex: build clean-target
+	cd compiler && opam exec -- dune exec -- compiler $(f) --lex
+
 # Run spec tests
 spec: build
 	./writing-a-c-compiler-tests/test_compiler $$(pwd)/compiler/_build/default/bin/main.exe --chapter 1 --stage lex
