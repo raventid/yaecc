@@ -44,6 +44,9 @@ run: build clean-target
 lex: build clean-target
 	cd compiler && opam exec -- dune exec -- compiler $(f) --lex
 
+parse: build clean-target
+	cd compiler && opam exec -- dune exec -- compiler $(f) --parse
+
 # Run spec tests
 spec: build
 	./writing-a-c-compiler-tests/test_compiler $$(pwd)/compiler/_build/default/bin/main.exe --chapter 1 --stage lex
