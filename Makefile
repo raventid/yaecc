@@ -47,6 +47,9 @@ lex: build clean-target
 parse: build clean-target
 	cd compiler && opam exec -- dune exec -- compiler $(f) --parse
 
+codegen: build clean-target
+	cd compiler && opam exec -- dune exec -- compiler $(f) --codegen
+
 # Run spec tests
 spec: build
 	./writing-a-c-compiler-tests/test_compiler $$(pwd)/compiler/_build/default/bin/main.exe --chapter 1 --stage lex
