@@ -100,7 +100,7 @@ let main () =
   
   (* For --lex, we would stop here and run lexer (not implemented yet) *)
   if stage = Lex then begin
-    printf "\n=== Lexing Complete ===\n";
+    printf "Lexer flag --lex is set, stopping after lexing\n";
     let content = 
       let ic = open_in preprocessed_file in
       let content = really_input_string ic (in_channel_length ic) in
@@ -110,10 +110,6 @@ let main () =
     let tokens = lex content in
     printf "Tokens:\n";
     print_tokens tokens;
-  end;
-  
-  if stage == Lex then begin 
-    printf "Lexer flag --lex is set, stopping after lexing\n";
     exit 0
   end;
   
