@@ -98,7 +98,7 @@ let main () =
   let preprocessed_file = preprocess_file input_file target_dir in
   printf "Preprocessed file: %s\n" preprocessed_file;
   
-  (* For --lex, we would stop here and run lexer (not implemented yet) *)
+  (* For --lex, we would stop here and run lexer *)
   if stage = Lex then begin
     printf "Lexer flag --lex is set, stopping after lexing\n";
     let content = 
