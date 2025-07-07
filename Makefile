@@ -53,6 +53,7 @@ codegen: build clean-target
 # Run spec tests
 spec: build
 	./writing-a-c-compiler-tests/test_compiler $$(pwd)/compiler/_build/default/bin/main.exe --chapter 1 --stage lex
+	./writing-a-c-compiler-tests/test_compiler $$(pwd)/compiler/_build/default/bin/main.exe --chapter 1 --stage parse
 
 # Show current architecture info
 arch-info:
