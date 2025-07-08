@@ -36,8 +36,15 @@ The project uses a =Makefile= to simplify common development tasks. All commands
 - =make test= - Run tests
 - =make install= - Install the project
 - =make run= - Build and execute the compiler
+- =make spec= - Run extended compiler specification test suite
 
 *** Quick Start
+
+Download submodules with Compiler specification.
+#+BEGIN_SRC bash
+git submodule init 
+git submodule update
+#+END_SRC
 
 To build and run the compiler:
 
