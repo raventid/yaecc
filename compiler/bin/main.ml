@@ -6,6 +6,7 @@
 
 open Printf
 open Compiler.Lexer
+open Compiler.Parser
 
 type compilation_stage = 
   | Lex
@@ -113,10 +114,27 @@ let main () =
     exit 0
   end;
   
-  (* For --parse, we would stop here and run parser (not implemented yet) *)
+  (* For --parse, we would stop here and run parser *)
   if stage = Parse then begin
     printf "\n=== Parsing Complete ===\n";
-    printf "Parser output would be processed here\n";
+    let content = 
+      let ic = open_in preprocessed_file in
+      let content = really_input_string ic (in_channel_length ic) in
+      close_in ic;
+      content
+    in
+    let tokens = lex content in
+    printf "Tokens:\n";
+    print_tokens tokens;
+    printf "\nParsing tokens...\n";
+    (match parse tokens with
+     | Ok ast -> 
+         printf "Parse successful!\n";
+         printf "AST:\n";
+         print_program ast
+     | Error msg -> 
+         printf "Parse error: %s\n" msg;
+         exit 1);
     exit 0
   end;
   
