@@ -28,33 +28,33 @@ let expect_token expected_token tokens =
 
 let parse_expression tokens =
   match tokens with
-  | Constant value :: rest -> (Constant value, rest)
+  | Lexer.Constant value :: rest -> (Constant value, rest)
   | token :: _ -> parse_error (sprintf "Expected expression but got %s" (token_to_string token))
   | [] -> parse_error "Expected expression but reached end of input"
 
 let parse_statement tokens =
   match tokens with
-  | Return :: rest ->
+  | Lexer.Return :: rest ->
       let (expr, rest') = parse_expression rest in
-      let rest'' = expect_token Semicolon rest' in
+      let rest'' = expect_token Lexer.Semicolon rest' in
       (Return expr, rest'')
   | token :: _ -> parse_error (sprintf "Expected statement but got %s" (token_to_string token))
   | [] -> parse_error "Expected statement but reached end of input"
 
 let parse_parameter_list tokens =
   match tokens with
-  | Void :: rest -> ([], rest)
+  | Lexer.Void :: rest -> ([], rest)
   | _ -> parse_error "Only void parameter lists are supported for now"
 
 let parse_function tokens =
   match tokens with
-  | Int :: Identifier name :: OpenParen :: rest ->
+  | Lexer.Int :: Lexer.Identifier name :: Lexer.OpenParen :: rest ->
       let (params, rest') = parse_parameter_list rest in
-      let rest'' = expect_token CloseParen rest' in
-      let rest''' = expect_token OpenBrace rest'' in
+      let rest'' = expect_token Lexer.CloseParen rest' in
+      let rest''' = expect_token Lexer.OpenBrace rest'' in
       let (stmt, rest'''') = parse_statement rest''' in
-      let rest''''' = expect_token CloseBrace rest'''' in
-      let rest'''''' = expect_token EOF rest''''' in
+      let rest''''' = expect_token Lexer.CloseBrace rest'''' in
+      let _ = expect_token Lexer.EOF rest''''' in
       {
         return_type = "int";
         name = name;
