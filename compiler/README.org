@@ -7,3 +7,13 @@ Compiler explorer https://godbolt.org
 
 Intel developer manual https://www.intel.com/content/www/us/en/developer/articles/technical/intel-sdm.html
 Unoficial, but easier to browse https://www.felixcloutier.com/x86/
+
+
+* Zephyr Abstract Syntax Description Language spec
+
+#+BEGIN_SRC
+program = Program(function_definition)
+function_definition = Function(identifier name, statement body)
+statement = Return(exp)
+exp = Constant(int)
+#+END_SRC
