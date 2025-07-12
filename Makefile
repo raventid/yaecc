@@ -1,4 +1,4 @@
-.PHONY: build clean test install run arch-info spec check-setup run_assembly clean-target
+.PHONY: build clean test install run arch-info spec check-setup run_assembly clean-target lex parse codegen
 
 # Default target
 all: build
