@@ -131,7 +131,9 @@ let main () =
      | Ok ast -> 
          printf "Parse successful!\n";
          printf "AST:\n";
-         print_program ast
+         print_program ast;
+         printf "\nPretty-printed AST:\n";
+         print_pretty_program ast
      | Error msg -> 
          printf "Parse error: %s\n" msg;
          exit 1);

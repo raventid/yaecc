@@ -86,3 +86,36 @@ let print_function func =
 
 let print_program prog =
   print_function prog
+
+(* Pretty-printer functions for debugging *)
+let pretty_print_expression indent expr =
+  let spaces = String.make indent ' ' in
+  match expr with
+  | Constant value -> sprintf "%sConstant(%d)" spaces value
+
+let pretty_print_statement indent stmt =
+  let spaces = String.make indent ' ' in
+  match stmt with
+  | Return expr -> 
+      sprintf "%sReturn(\n%s\n%s)" 
+        spaces 
+        (pretty_print_expression (indent + 2) expr) 
+        spaces
+
+let pretty_print_function indent func =
+  let spaces = String.make indent ' ' in
+  let body_str = String.concat ",\n" 
+    (List.map (pretty_print_statement (indent + 2)) func.body) in
+  sprintf "%sFunction(\n%s  name=\"%s\",\n%s  body=%s\n%s)" 
+    spaces 
+    spaces 
+    func.name 
+    spaces 
+    body_str 
+    spaces
+
+let pretty_print_program prog =
+  sprintf "Program(\n%s\n)" (pretty_print_function 2 prog)
+
+let print_pretty_program prog =
+  printf "%s\n" (pretty_print_program prog)
