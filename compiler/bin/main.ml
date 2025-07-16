@@ -6,7 +6,9 @@
 
 open Printf
 open Compiler.Lexer
-open Compiler.Parser
+
+module Parser = Compiler.Parser
+module Codegen = Compiler.Codegen
 
 type compilation_stage = 
   | Lex
@@ -127,13 +129,13 @@ let main () =
     printf "Tokens:\n";
     print_tokens tokens;
     printf "\nParsing tokens...\n";
-    (match parse tokens with
+    (match Parser.parse tokens with
      | Ok ast -> 
          printf "Parse successful!\n";
          printf "AST:\n";
-         print_program ast;
+         Parser.print_program ast;
          printf "\nPretty-printed AST:\n";
-         print_pretty_program ast
+         Parser.print_pretty_program ast
      | Error msg -> 
          printf "Parse error: %s\n" msg;
          exit 1);
@@ -142,15 +144,42 @@ let main () =
   
   (* Step 2: Compile to assembly *)
   printf "\n=== Step 2: Compile to Assembly ===\n";
+  let content = 
+    let ic = open_in preprocessed_file in
+    let content = really_input_string ic (in_channel_length ic) in
+    close_in ic;
+    content
+  in
+  let tokens = lex content in
+  printf "Tokens:\n";
+  print_tokens tokens;
+  printf "\nParsing tokens...\n";
+  (match Parser.parse tokens with
+   | Ok ast -> 
+       printf "Parse successful!\n";
+       printf "Generating assembly...\n";
+       (match Codegen.codegen ast with
+        | Ok assembly_ir -> 
+            printf "Assembly IR:\n";
+            Codegen.print_program assembly_ir;
+            printf "\nPretty-printed Assembly IR:\n";
+            Codegen.print_pretty_program assembly_ir;
+            (* For --codegen, we stop here *)
+            if stage = Codegen then begin
+              printf "\n=== Code Generation Complete ===\n";
+              printf "Assembly IR generation complete, stopping before actual assembly output\n";
+              exit 0
+            end
+        | Error msg -> 
+            printf "Codegen error: %s\n" msg;
+            exit 1)
+   | Error msg -> 
+       printf "Parse error: %s\n" msg;
+       exit 1);
+  
+  (* If we reach here, continue with GCC compilation for Full stage *)
   let assembly_file = compile_to_assembly preprocessed_file target_dir in
   printf "Assembly file: %s\n" assembly_file;
-  
-  (* For --codegen, we stop here *)
-  if stage = Codegen then begin
-    printf "\n=== Code Generation Complete ===\n";
-    printf "Assembly generation complete, stopping before linking\n";
-    exit 0
-  end;
   
   (* Step 3: Compile to executable (only for Full compilation) *)
   printf "\n=== Step 3: Link to Executable ===\n";
