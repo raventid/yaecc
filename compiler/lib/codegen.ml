@@ -94,3 +94,44 @@ let codegen ast =
     Ok (generate_program ast)
   with
   | exn -> Error (sprintf "Code generation error: %s" (Printexc.to_string exn))
+
+(* x86 Linux assembly generation *)
+let generate_x86_operand = function
+  | Imm i -> sprintf "$%d" i
+  | Register reg -> sprintf "%%%s" reg
+
+let generate_x86_instruction = function
+  | Mov (src, dst) -> sprintf "    movl %s, %s" (generate_x86_operand src) (generate_x86_operand dst)
+  | Ret -> "    ret"
+
+let generate_x86_function func =
+  let prologue = [
+    sprintf ".globl %s" func.name;
+    sprintf "%s:" func.name;
+  ] in
+  let instructions = List.map generate_x86_instruction func.instructions in
+  String.concat "\n" (prologue @ instructions)
+
+let generate_x86_program = function
+  | Program func -> generate_x86_function func
+
+(* Write assembly to file *)
+let write_assembly_to_file assembly_code output_file =
+  try
+    let oc = open_out output_file in
+    output_string oc assembly_code;
+    output_string oc "\n";
+    close_out oc;
+    Ok ()
+  with
+  | exn -> Error (sprintf "Failed to write assembly file: %s" (Printexc.to_string exn))
+
+(* Complete codegen pipeline *)
+let codegen_to_file ast output_file =
+  match codegen ast with
+  | Ok assembly_ir ->
+      let assembly_code = generate_x86_program assembly_ir in
+      (match write_assembly_to_file assembly_code output_file with
+       | Ok () -> Ok assembly_ir
+       | Error msg -> Error msg)
+  | Error msg -> Error msg

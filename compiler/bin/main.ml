@@ -16,6 +16,9 @@ type compilation_stage =
   | Codegen
   | Full
 
+(* Flag to use GCC for compilation instead of our compiler *)
+let use_gcc = ref false
+
 let create_target_dir input_file =
   let base_target_dir = "_target" in
   let filename = Filename.basename input_file in
@@ -48,12 +51,15 @@ let preprocess_file input_file target_dir =
   run_command cmd;
   preprocessed_file
 
+(* GCC compilation functions - commented out but kept for future --gcc flag implementation *)
+(*
 let compile_to_assembly preprocessed_file target_dir =
   let assembly_file = Filename.concat target_dir "output.s" in
   let cmd = sprintf "gcc -S -O -fno-asynchronous-unwind-tables -fcf-protection=none %s -o %s" 
     preprocessed_file assembly_file in
   run_command cmd;
   assembly_file
+*)
 
 let compile_to_executable assembly_file target_dir =
   let executable_file = Filename.concat target_dir "output" in
@@ -71,12 +77,13 @@ let parse_args () =
     | "--lex" -> stage := Lex
     | "--parse" -> stage := Parse
     | "--codegen" -> stage := Codegen
+    | "--gcc" -> use_gcc := true
     | _ when !input_file = "" -> input_file := arg
     | _ -> failwith (sprintf "Unknown argument: %s" arg)
   ) args;
   
   if !input_file = "" then begin
-    printf "Usage: %s [--lex|--parse|--codegen] <input_file.c>\n" Sys.argv.(0);
+    printf "Usage: %s [--lex|--parse|--codegen] [--gcc] <input_file.c>\n" Sys.argv.(0);
     exit 1
   end;
   
@@ -158,16 +165,19 @@ let main () =
    | Ok ast -> 
        printf "Parse successful!\n";
        printf "Generating assembly...\n";
-       (match Codegen.codegen ast with
+       let assembly_file = Filename.concat target_dir "output.s" in
+       (match Codegen.codegen_to_file ast assembly_file with
         | Ok assembly_ir -> 
             printf "Assembly IR:\n";
             Codegen.print_program assembly_ir;
             printf "\nPretty-printed Assembly IR:\n";
             Codegen.print_pretty_program assembly_ir;
+            printf "\nAssembly file generated: %s\n" assembly_file;
+            
             (* For --codegen, we stop here *)
             if stage = Codegen then begin
               printf "\n=== Code Generation Complete ===\n";
-              printf "Assembly IR generation complete, stopping before actual assembly output\n";
+              printf "Assembly generation complete, stopping before linking\n";
               exit 0
             end
         | Error msg -> 
@@ -177,11 +187,23 @@ let main () =
        printf "Parse error: %s\n" msg;
        exit 1);
   
-  (* If we reach here, continue with GCC compilation for Full stage *)
-  let assembly_file = compile_to_assembly preprocessed_file target_dir in
-  printf "Assembly file: %s\n" assembly_file;
+  (* If we reach here, we're in Full stage *)
+  (* Use our generated assembly file or GCC depending on --gcc flag *)
+  let assembly_file = 
+    if !use_gcc then begin
+      (* Comment: Future implementation for --gcc flag *)
+      (* let assembly_file = compile_to_assembly preprocessed_file target_dir in *)
+      printf "GCC compilation not yet implemented in this version\n";
+      exit 1
+    end else begin
+      (* Use our generated assembly file *)
+      let assembly_file = Filename.concat target_dir "output.s" in
+      printf "Using generated assembly file: %s\n" assembly_file;
+      assembly_file
+    end
+  in
   
-  (* Step 3: Compile to executable (only for Full compilation) *)
+  (* Step 3: Link to Executable *)
   printf "\n=== Step 3: Link to Executable ===\n";
   let executable_file = compile_to_executable assembly_file target_dir in
   printf "Executable file: %s\n" executable_file;
