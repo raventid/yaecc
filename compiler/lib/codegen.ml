@@ -106,7 +106,7 @@ let generate_x86_instruction = function
 
 let generate_x86_function func =
   let prologue = [
-    sprintf ".globl %s" func.name;
+    sprintf "  .globl %s" func.name;
     sprintf "%s:" func.name;
   ] in
   let instructions = List.map generate_x86_instruction func.instructions in
