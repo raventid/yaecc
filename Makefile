@@ -1,4 +1,4 @@
-.PHONY: build clean test install run arch-info spec check-setup run_assembly clean-target lex parse codegen
+.PHONY: build clean test install run arch-info spec check-setup run_assembly clean-target lex parse codegen run-to
 
 # Default target
 all: build
@@ -40,6 +40,10 @@ x86_shell:
 # Run the compiled binary
 run: build clean-target
 	cd compiler && opam exec -- dune exec -- compiler $(f)
+
+# Run the compiled binary with custom target directory
+run-to: build clean-target
+	cd compiler && opam exec -- dune exec -- compiler $(f) --target-dir=$(dir)
 
 lex: build clean-target
 	cd compiler && opam exec -- dune exec -- compiler $(f) --lex

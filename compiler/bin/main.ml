@@ -19,6 +19,9 @@ type compilation_stage =
 (* Flag to use GCC for compilation instead of our compiler *)
 let use_gcc = ref false
 
+(* Target directory for executable output *)
+let target_dir_flag = ref None
+
 let create_target_dir input_file =
   let base_target_dir = "_target" in
   let filename = Filename.basename input_file in
@@ -36,11 +39,14 @@ let create_target_dir input_file =
   target_dir
 
 (* Get the expected output executable path from input file *)
-let get_executable_path input_file =
-  let dir = Filename.dirname input_file in
+let get_executable_path input_file custom_target_dir =
   let basename = Filename.basename input_file in
   let name_without_ext = Filename.remove_extension basename in
-  Filename.concat dir name_without_ext
+  match custom_target_dir with
+  | Some target_dir -> Filename.concat target_dir name_without_ext
+  | None -> 
+      let dir = Filename.dirname input_file in
+      Filename.concat dir name_without_ext
 
 let run_command cmd =
   printf "Running: %s\n" cmd;
@@ -77,25 +83,43 @@ let parse_args () =
   let stage = ref Full in
   let input_file = ref "" in
   let args = Array.sub Sys.argv 1 (Array.length Sys.argv - 1) in
+  let i = ref 0 in
   
-  Array.iter (fun arg ->
+  while !i < Array.length args do
+    let arg = args.(!i) in
     match arg with
-    | "--lex" -> stage := Lex
-    | "--parse" -> stage := Parse
-    | "--codegen" -> stage := Codegen
-    | "--gcc" -> use_gcc := true
-    | _ when !input_file = "" -> input_file := arg
+    | "--lex" -> stage := Lex; incr i
+    | "--parse" -> stage := Parse; incr i
+    | "--codegen" -> stage := Codegen; incr i
+    | "--gcc" -> use_gcc := true; incr i
+    | arg when String.length arg >= 12 && String.sub arg 0 12 = "--target-dir" ->
+        if String.length arg > 12 && arg.[12] = '=' then
+          (* Format: --target-dir=path *)
+          let target_path = String.sub arg 13 (String.length arg - 13) in
+          target_dir_flag := Some target_path;
+          incr i
+        else if String.length arg = 12 then
+          (* Format: --target-dir path *)
+          if !i + 1 < Array.length args then (
+            target_dir_flag := Some args.(!i + 1);
+            i := !i + 2
+          ) else
+            failwith "Missing argument for --target-dir"
+        else
+          failwith (sprintf "Invalid --target-dir format: %s" arg)
+    | _ when !input_file = "" -> input_file := arg; incr i
     | _ -> failwith (sprintf "Unknown argument: %s" arg)
-  ) args;
+  done;
   
   if !input_file = "" then begin
-    printf "Usage: %s [--lex|--parse|--codegen] [--gcc] <input_file.c>\n" Sys.argv.(0);
+    printf "Usage: %s [--lex|--parse|--codegen] [--gcc] [--target-dir=path] <input_file.c>\n" Sys.argv.(0);
     exit 1
   end;
   
   (!stage, !input_file)
 
 let main () =
+  Random.self_init ();
   let (stage, input_file_arg) = parse_args () in
   (* Convert relative path to absolute path from compiler directory *)
   let input_file = if Filename.is_relative input_file_arg then
@@ -104,6 +128,22 @@ let main () =
     input_file_arg
   in
   printf "Compiling: %s\n" input_file;
+  
+  (* Create target directory if specified and ensure it exists *)
+  (match !target_dir_flag with
+   | Some target_dir ->
+       if not (Sys.file_exists target_dir) then (
+         printf "Creating target directory: %s\n" target_dir;
+         let rec create_dirs path =
+           let parent = Filename.dirname path in
+           if parent <> path && not (Sys.file_exists parent) then
+             create_dirs parent;
+           if not (Sys.file_exists path) then
+             Sys.mkdir path 0o755
+         in
+         create_dirs target_dir
+       )
+   | None -> ());
   
   (* Create target directory only for full compilation *)
   let target_dir = if stage = Full then begin
@@ -221,7 +261,7 @@ let main () =
   
   (* Step 3: Link to Executable *)
   printf "\n=== Step 3: Link to Executable ===\n";
-  let expected_executable = get_executable_path input_file in
+  let expected_executable = get_executable_path input_file !target_dir_flag in
   let executable_file = compile_to_executable assembly_file expected_executable in
   printf "Executable file: %s\n" executable_file;
   
