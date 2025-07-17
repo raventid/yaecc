@@ -121,6 +121,8 @@ let write_assembly_to_file assembly_code output_file =
     let oc = open_out output_file in
     output_string oc assembly_code;
     output_string oc "\n";
+    output_string oc ".section .note.GNU-stack,\"\",@progbits"; (* Probably should move this to some kind of epilogue function *)
+    output_string oc "\n";
     close_out oc;
     Ok ()
   with
