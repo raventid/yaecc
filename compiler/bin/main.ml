@@ -1,4 +1,4 @@
-(* 
+(*
   --lex Directs it to run the lexer, but stop before parsing
   --parse Directs it to run the lexer and parser, but stop before assembly generation
   --codegen Directs it to perform lexing, parsing, and assembly generation, but stop before code emission 
@@ -35,6 +35,13 @@ let create_target_dir input_file =
   
   target_dir
 
+(* Get the expected output executable path from input file *)
+let get_executable_path input_file =
+  let dir = Filename.dirname input_file in
+  let basename = Filename.basename input_file in
+  let name_without_ext = Filename.remove_extension basename in
+  Filename.concat dir name_without_ext
+
 let run_command cmd =
   printf "Running: %s\n" cmd;
   let exit_code = Sys.command cmd in
@@ -61,11 +68,10 @@ let compile_to_assembly preprocessed_file target_dir =
   assembly_file
 *)
 
-let compile_to_executable assembly_file target_dir =
-  let executable_file = Filename.concat target_dir "output" in
-  let cmd = sprintf "gcc %s -o %s" assembly_file executable_file in
+let compile_to_executable assembly_file output_executable =
+  let cmd = sprintf "gcc %s -o %s" assembly_file output_executable in
   run_command cmd;
-  executable_file
+  output_executable
 
 let parse_args () =
   let stage = ref Full in
@@ -99,9 +105,19 @@ let main () =
   in
   printf "Compiling: %s\n" input_file;
   
-  (* Create target directory *)
-  let target_dir = create_target_dir input_file_arg in
-  printf "Created target directory: %s\n" target_dir;
+  (* Create target directory only for full compilation *)
+  let target_dir = if stage = Full then begin
+    let target_dir = create_target_dir input_file_arg in
+    printf "Created target directory: %s\n" target_dir;
+    target_dir
+  end else begin
+    (* For intermediate stages, use a temporary directory *)
+    let temp_dir = Filename.get_temp_dir_name () in
+    let temp_subdir = Filename.concat temp_dir (sprintf "compiler_temp_%d" (Random.int 10000)) in
+    if not (Sys.file_exists temp_subdir) then
+      Sys.mkdir temp_subdir 0o755;
+    temp_subdir
+  end in
   
   (* Step 1: Preprocess *)
   printf "\n=== Step 1: Preprocessing ===\n";
@@ -205,10 +221,11 @@ let main () =
   
   (* Step 3: Link to Executable *)
   printf "\n=== Step 3: Link to Executable ===\n";
-  let executable_file = compile_to_executable assembly_file target_dir in
+  let expected_executable = get_executable_path input_file in
+  let executable_file = compile_to_executable assembly_file expected_executable in
   printf "Executable file: %s\n" executable_file;
   
   printf "\n=== Compilation Complete ===\n";
-  printf "You can run the executable with: ./%s\n" executable_file
+  printf "You can run the executable with: %s\n" executable_file
 
 let () = main ()
