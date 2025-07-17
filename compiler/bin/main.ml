@@ -92,7 +92,7 @@ let parse_args () =
     | "--parse" -> stage := Parse; incr i
     | "--codegen" -> stage := Codegen; incr i
     | "--gcc" -> use_gcc := true; incr i
-    | arg when String.length arg >= 12 && String.sub arg 0 12 = "--target-dir" ->
+    | arg when String.length arg >= 12 && String.sub arg 0 12 = "--target-dir" -> (*TODO: @raventid, this is ugly, should simplify*)
         if String.length arg > 12 && arg.[12] = '=' then
           (* Format: --target-dir=path *)
           let target_path = String.sub arg 13 (String.length arg - 13) in
