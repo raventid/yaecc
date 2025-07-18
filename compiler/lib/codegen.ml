@@ -1,5 +1,11 @@
 open Printf
 
+(* Supported architectures *)
+type architecture =
+  | X86_Linux
+  | X86_MacOS
+  | Apple_Silicon_MacOS
+
 (* Assembly IR types *)
 type operand =
   | Imm of int
@@ -15,6 +21,59 @@ type function_definition = {
 }
 
 type program = Program of function_definition
+
+let detect_architecture () =
+  try
+    (* Use system command to detect architecture *)
+    let temp_file = Filename.temp_file "arch" ".txt" in
+    let exit_code = Sys.command (sprintf "uname -m > %s" temp_file) in
+    if exit_code = 0 then (
+      let ic = open_in temp_file in
+      let arch_output = input_line ic in
+      close_in ic;
+      Sys.remove temp_file;
+      let normalized_arch = String.trim arch_output in
+      match normalized_arch with
+      | "arm64" | "aarch64" -> Apple_Silicon_MacOS
+      | "x86_64" when Sys.os_type = "Unix" -> 
+          (* Need to distinguish between Linux and macOS *)
+          let os_temp_file = Filename.temp_file "os" ".txt" in
+          let os_exit_code = Sys.command (sprintf "uname -s > %s" os_temp_file) in
+          if os_exit_code = 0 then (
+            let os_ic = open_in os_temp_file in
+            let os_output = input_line os_ic in
+            close_in os_ic;
+            Sys.remove os_temp_file;
+            let normalized_os = String.trim os_output in
+            match normalized_os with
+            | "Darwin" -> X86_MacOS
+            | "Linux" -> X86_Linux
+            | other -> 
+                printf "Warning: Unsupported OS '%s' on x86_64, defaulting to x86_linux\n" other;
+                X86_Linux
+          ) else (
+            Sys.remove os_temp_file;
+            printf "Warning: Failed to detect OS, defaulting to x86_linux\n";
+            X86_Linux
+          )
+      | other -> 
+          printf "Error: Unsupported architecture '%s'. Only x86_64 and arm64 are supported.\n" other;
+          failwith (sprintf "Unsupported architecture: %s" other)
+    ) else (
+      Sys.remove temp_file;
+      printf "Warning: Failed to detect architecture, defaulting to x86_linux\n";
+      X86_Linux
+    )
+  with
+  | exn ->
+      printf "Error: Failed to detect architecture (%s)\n" (Printexc.to_string exn);
+      failwith (sprintf "Architecture detection failed: %s" (Printexc.to_string exn))
+
+(* Helper function to convert architecture to string *)
+let architecture_to_string = function
+  | X86_Linux -> "x86_linux"
+  | X86_MacOS -> "x86_macos"
+  | Apple_Silicon_MacOS -> "apple_silicon_macos"
 
 (* Pretty-printing for assembly IR *)
 let operand_to_string = function

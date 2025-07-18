@@ -1,3 +1,4 @@
 (library
  (name compiler)
+ (libraries unix)
  (modules lexer parser codegen))

@@ -129,6 +129,10 @@ let main () =
   in
   printf "Compiling: %s\n" input_file;
   
+  (* Detect and display architecture *)
+  let arch = Codegen.detect_architecture () in
+  printf "Detected architecture: %s\n" (Codegen.architecture_to_string arch);
+  
   (* Create target directory if specified and ensure it exists *)
   (match !target_dir_flag with
    | Some target_dir ->
