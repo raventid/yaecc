@@ -1,4 +1,4 @@
 (library
  (name compiler)
  (libraries unix)
- (modules lexer parser codegen))
+ (modules lexer parser codegen codegen_aarch64))

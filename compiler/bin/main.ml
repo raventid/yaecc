@@ -9,6 +9,7 @@ open Compiler.Lexer
 
 module Parser = Compiler.Parser
 module Codegen = Compiler.Codegen
+module Codegen_aarch64 = Compiler.Codegen_aarch64
 
 type compilation_stage = 
   | Lex
@@ -226,7 +227,16 @@ let main () =
        printf "Parse successful!\n";
        printf "Generating assembly...\n";
        let assembly_file = Filename.concat target_dir "output.s" in
-       (match Codegen.codegen_to_file ast assembly_file with
+       (* Choose codegen based on detected architecture *)
+       let codegen_result = match arch with
+         | Codegen.Apple_Silicon_MacOS -> 
+             printf "Using AArch64 codegen for Apple Silicon\n";
+             Codegen_aarch64.codegen_aarch64_to_file ast assembly_file
+         | Codegen.X86_Linux | Codegen.X86_MacOS -> 
+             printf "Using x86 codegen\n";
+             Codegen.codegen_to_file ast assembly_file
+       in
+       (match codegen_result with
         | Ok assembly_ir -> 
             printf "Assembly IR:\n";
             Codegen.print_program assembly_ir;
